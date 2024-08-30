@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Nights</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #1e1e1e;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    flex-wrap: wrap;
+}
+
+.header .logo {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.header .logo:hover {
+    color: #ff6347;
+}
+
+.header .left {
+    display: flex;
+    align-items: center;
+}
+
+.header .left .menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.header .center {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header .center .search-bar {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    background-color: #2a2a2a;
+    border-radius: 25px;
+    padding: 5px;
+}
+
+.header .center .search-bar input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 25px;
+    outline: none;
+}
+
+.header .center .search-bar i {
+    color: #ffffff;
+    font-size: 18px;
+    margin-right: 15px;
+    position: relative;
+    left: 10px;
+}
+
+.header .right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header .right .nav-item {
+    font-size: 18px; /* Increased font size */
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 5px 10px;
+    transition: background 0.3s, color 0.3s; /* Added color transition */
+    display: flex;
+    align-items: center;
+    color: #ffffff; /* Default color */
+}
+
+.header .right .nav-item:hover {
+    background-color: #ff6347; /* Hover color same as logo */
+    color: #ffffff; /* Hover text color */
+}
+
+.header .right .nav-item i {
+    margin-right: 8px;
+}
+
+.header .right .nav-item.login-icon,
+.header .right .nav-item.profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #2a2a2a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.header .right .nav-item i {
+    margin: 0;
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.header .right .nav-item.profile-icon {
+    display: none;
+}
+
+.header .right .nav-item.login-icon {
+    display: flex;
+}
+
+       
+
+        @media (min-width: 768px) {
+            .header {
+                display: flex;
+            }
+            .slide-menu {
+                display: none;
+            }
+        }
+        @media (max-width: 768px) {
+            .header {
+                display: none;
+            }
+            .slide-menu {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="left">
+            <a href="#" class="logo">Network Nights</a>
+            <div class="menu-icon" onclick="toggleMenu()">
+                
+            </div>
+        </div>
+        <div class="center">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search...">
+            </div>
+        </div>
+        <div class="right">
+            <div class="nav-item"><i class="fas fa-chart-line"></i>Analysis</div>
+            <div class="nav-item"><i class="fas fa-tachometer-alt"></i>Dashboarding</div>
+            <div class="nav-item"><i class="fas fa-database"></i>EDA</div>
+            <div class="nav-item"><i class="fas fa-cogs"></i>Model Training</div>
+            <div class="nav-item"><i class="fas fa-bell"></i>Alarm</div>
+            <div class="nav-item login-icon" onclick="location.href='/loginSignup'">
+                <i class="fas fa-sign-in-alt"></i>
+                <span class="nav-text">Login</span>
+            </div>
+            
+            
+            <div class="nav-item profile-icon"><i class="fas fa-user"></i></div>
+        </div>
+    </header>
+
+    
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('slideMenu').classList.toggle('active');
+        }
+
+        // Simulate login status for demonstration
+        let isLoggedIn = false; // Change to true when user logs in
+
+        function updateHeader() {
+            const loginIcon = document.querySelector('.login-icon');
+            const profileIcon = document.querySelector('.profile-icon');
+
+            if (isLoggedIn) {
+                loginIcon.style.display = 'none';
+                profileIcon.style.display = 'flex';
+            } else {
+                loginIcon.style.display = 'flex';
+                profileIcon.style.display = 'none';
+            }
+        }
+
+        // Initialize header state
+        updateHeader();
+
+        document.querySelector('.menu-icon').addEventListener('click', toggleMenu);
+    </script>
+
+</body>
+</html>
