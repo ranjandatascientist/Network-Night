@@ -273,29 +273,34 @@
         </div>
 
         <div id="loginForm" class="form-section active">
-            <form id="loginFormContent" onsubmit="handleLogin(event)">
-                <input type="text" id="loginUsername" placeholder="Username">
-                <input type="password" id="loginPassword" placeholder="Password">
+            <form id="loginFormContent" method="post" action="{% url 'login' %}" onsubmit="handleLogin(event)">
+                {% csrf_token %}
+                <input type="text" id="loginUsername" name="loginUsername" placeholder="Username">
+                <input type="password" id="loginPassword" name="loginPassword" placeholder="Password">
                 <button type="submit">Login</button>
             </form>
         </div>
-
+        
         <div id="signupForm" class="form-section">
-            <form id="signupFormContent" onsubmit="handleSignup(event)">
-                <input type="text" id="FullName" placeholder="Full Name">
-                <input type="text" id="signupUsername" placeholder="Username">
-                <input type="email" id="signupEmail" placeholder="Email">
-                <input type="password" id="signupPassword" placeholder="Password">
-                <input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
+            <form method="POST" action="{% url 'signup' %}">
+                {% csrf_token %}
+                <input type="text" id="FullName" name="FullName" placeholder="Full Name">
+                <input type="text" id="signupUsername" name="Username" placeholder="Username">
+                <input type="email" id="signupEmail" name="Email" placeholder="Email">
+                <input type="password" id="signupPassword" name="password" placeholder="Password">
+                <input type="password" id="signupConfirmPassword" name="confirm_password" placeholder="Confirm Password">
                 <button type="submit">Sign Up</button>
             </form>
+            
+            
         </div>
+        
     </div>
 
     <div class="toast-panel" id="toastPanel"></div>
     {% include 'include/footer.html' %}
     <script>
-      document.getElementById('loginTab').addEventListener('click', function () {
+     document.getElementById('loginTab').addEventListener('click', function () {
     toggleForm('login');
 });
 
@@ -322,87 +327,148 @@ function toggleForm(form) {
     }
 }
 
+function handleLogin(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
 
-        function handleLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-
-            if (username && password) {
-                showToast('success', 'Success!', 'Login successful!');
-            } else {
-                showToast('error', 'Error!', 'Please enter both username and password.');
-            }
-        }
-
-        function handleSignup(event) {
-            event.preventDefault();
-            const  fullname = document.getElementById('FullName').value;
-            const username = document.getElementById('signupUsername').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('signupConfirmPassword').value;
-
-            if (!fullname || !username || !email || !password || !confirmPassword) {
-        let message = 'Please fill in all required details.';
-        
-        showToast('warning', 'Warning!', message.trim());
+    // Check if both username and password are provided
+    if (!username || !password) {
+        showToast('warning', 'Warning!', 'Please enter both your username and password to log in.');
         return;
     }
-   
 
-
-            if (!validateEmail(email)) {
-                showToast('warning', 'Warning!', 'Invalid email format.');
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showToast('warning', 'Warning!', 'Passwords do not match.');
-                return;
-            }
-
-            const passwordValidation = validatePassword(password);
-            if (!passwordValidation.valid) {
-                showToast('warning', 'Warning!', passwordValidation.message);
-                return;
-            }
-
-            if (username && email && password) {
-                showToast('success', 'Success!', 'You have registered successfully!');
-            } else {
-                showToast('error', 'Error!', 'Please fill in all fields.');
-            }
+    // Send the login request
+    fetch('/login/', { // Update URL if necessary
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken() // CSRF token
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('success', 'Success!', 'You have successfully logged in.');
+            window.location.href = '/'; // Redirect to home or another page on success
+        } else {
+            // Display error message from server
+            showToast('error', 'Error!', data.message || 'Invalid username or password.');
         }
+    })
+    .catch(error => {
+        showToast('error', 'Error!', 'An unexpected error occurred.');
+        console.error('Error:', error);
+    });
+}
 
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(String(email).toLowerCase());
+// Function to get CSRF token from the page
+function getCsrfToken() {
+    const csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+    return csrfTokenElement ? csrfTokenElement.value : '';
+}
+
+// Function to display toast notifications
+function showToast(type, title, message) {
+    // Implement your toast notification logic here
+    console.log(`${type}: ${title} - ${message}`);
+}
+
+
+function handleSignup(event) {
+    event.preventDefault();
+    const fullname = document.getElementById('FullName').value;
+    const username = document.getElementById('signupUsername').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+    // Check if any required field is missing
+    if (!fullname || !username || !email || !password || !confirmPassword) {
+        showToast('warning', 'Warning!', 'Please complete all required fields.');
+        return;
+    }
+
+    // Check if the email format is valid
+    if (!validateEmail(email)) {
+        showToast('warning', 'Warning!', 'Invalid email format.');
+        return;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+        showToast('warning', 'Warning!', 'Passwords do not match.');
+        return;
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+        showToast('warning', 'Warning!', passwordValidation.message);
+        return;
+    }
+
+    // Create and send the signup request
+    fetch('/signup/', { // Update URL if necessary
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken() // Add CSRF token for Django
+        },
+        body: JSON.stringify({
+            fullname: fullname,
+            username: username,
+            email: email,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('success', 'Success!', 'You have registered successfully!');
+            window.location.href = '/loginSignup/'; // Redirect to login page or another page on success
+        } else {
+            showToast('error', 'Error!', data.message || 'Registration failed.');
         }
+    })
+    .catch(error => {
+        showToast('error', 'Error!', 'An unexpected error occurred.');
+        console.error('Error:', error);
+    });
+}
 
-        function validatePassword(password) {
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-            const isLengthValid = password.length >= 8;
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+}
 
-            if (!hasUpperCase) {
-                return { valid: false, message: 'Password must include at least one uppercase letter.' };
-            }
-            if (!hasNumber) {
-                return { valid: false, message: 'Password must include at least one numeric character.' };
-            }
-            if (!hasSpecialChar) {
-                return { valid: false, message: 'Password must include at least one special character.' };
-            }
-            if (!isLengthValid) {
-                return { valid: false, message: 'Password must be at least 8 characters long.' };
-            }
-            return { valid: true, message: '' };
-        }
-    
+function validatePassword(password) {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const isLengthValid = password.length >= 8;
 
-        function showToast(type, title, message) {
+    if (!hasUpperCase) {
+        return { valid: false, message: 'Password must include at least one uppercase letter.' };
+    }
+    if (!hasNumber) {
+        return { valid: false, message: 'Password must include at least one numeric character.' };
+    }
+    if (!hasSpecialChar) {
+        return { valid: false, message: 'Password must include at least one special character.' };
+    }
+    if (!isLengthValid) {
+        return { valid: false, message: 'Password must be at least 8 characters long.' };
+    }
+    return { valid: true, message: '' };
+}
+
+function showToast(type, title, message) {
     const toastPanel = document.getElementById('toastPanel');
     const toastItem = document.createElement('div');
     toastItem.className = `toast-item ${type}`;
@@ -429,6 +495,15 @@ function closeToast(button) {
     toastItem.style.maxHeight = '0';
     toastItem.style.opacity = '0';
     setTimeout(() => toastItem.remove(), 300);
+}
+
+function getCsrfToken() {
+    let token = null;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        token = csrfToken.value;
+    }
+    return token;
 }
     </script>
 </body>
